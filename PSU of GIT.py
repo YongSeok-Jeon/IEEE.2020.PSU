@@ -31,7 +31,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-import category_encoders as ce
+import category_encoders as ce # 2.1.0 version!!
 from scipy.spatial import distance
 import scipy.stats as ss
 import sys
