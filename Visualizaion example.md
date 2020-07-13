@@ -4,4 +4,4 @@
 
 ## PSU
 
-![PSU](https://user-images.githubusercontent.com/32161958/87297644-bcd86380-c543-11ea-9786-0f8564b475fb.gif)
+![PSU](https://user-images.githubusercontent.com/32161958/87298384-12f9d680-c545-11ea-9021-76627686395d.gif)
