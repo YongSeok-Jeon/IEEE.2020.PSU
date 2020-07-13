@@ -7,7 +7,6 @@
 ################################################################################################################################################
 ### Setting up environment
 ################################################################################################################################################
-
 # Load library
 from sklearn.exceptions import ConvergenceWarning
 import warnings
@@ -37,6 +36,7 @@ import scipy.stats as ss
 import sys
 mod = sys.modules[__name__]
 import pickle
+
 # Load Datasets
 with open("Data.pickle","rb") as fr:
     Dataset = pickle.load(fr)
@@ -44,7 +44,6 @@ with open("Data.pickle","rb") as fr:
 ################################################################################################################################################
 ### PSU
 ################################################################################################################################################
-    
 def PSU(aa,bb):
     if type(bb) != list:
         bb = bb.ravel()
@@ -105,9 +104,9 @@ for i0 in [50]:
         
         n_major = 1000
         data_major = np.r_[3 * rng.randn(n_major, 2)]
-        
         n_major_outlier = 4
         far = 10
+        
         data_major = np.vstack((data_major, 5 * rng.randn(n_major_outlier, 2) + [far,far]))
         data_major = np.vstack((data_major, 5 * rng.randn(n_major_outlier, 2) + [-far,far]))
         data_major = np.vstack((data_major, 5 * rng.randn(n_major_outlier, 2) + [far,-far]))
@@ -117,7 +116,6 @@ for i0 in [50]:
         y = np.zeros(len(data_major))
         X = np.vstack((data_major, data_minor))
         y = np.hstack((y,np.ones(len(data_minor))))
-        
         
         if i1 not in [0,8] :
             if i1 == 1:
@@ -159,18 +157,10 @@ for i0 in [50]:
 ## Figure 4.
 for i0 in range(4):
     
-    temp1 = []
-    for ii in range(55):
-        temp1.append(np.mean(np.array(Dataset[2][i0].ravel()).reshape(55,100,8)[ii], axis = 0))
-    temp1 = np.array(temp1)
+    temp1 = np.array(Dataset[2][i0][:,list([0,1,2,3,7])])
+    XX = list(np.array(pd.DataFrame(-temp1).rank(method = "average", axis = 1)).ravel())
     
-    XX = list(np.array(pd.DataFrame(-temp1[:,list([0,1,2,3,7])]).rank(method = "average", axis = 1)).ravel())
-    
-    temp2 = []
-    for ii in range(55):
-        temp2.append(np.mean(np.array(Dataset[2][-1].ravel()).reshape(55,100,5)[ii], axis = 0))
-    temp2 = np.array(temp2)
-
+    temp2 = np.array(Dataset[2][-1])
     YY = list(np.array(pd.DataFrame(-temp2).rank(method = "average", axis = 1)).ravel())
 
     #Spearman test
@@ -178,9 +168,31 @@ for i0 in range(4):
     
     mat = np.zeros((5,5))
     for i1 in range(len(XX)):
-        mat[int(XX[i1]-1), int(YY[i1]-1)] = mat[int(XX[i1]-1), int(YY[i1]-1)] + 1
-
-    #print(mat.T)
+        if XX[i1] - int(XX[i1]) != 0:        
+            t1_1 = int(XX[i1])
+            t1_2 = int(XX[i1]) + 1        
+            if YY[i1] - int(YY[i1]) != 0:
+                t2_1 = int(YY[i1])
+                t2_2 = int(YY[i1]) + 1            
+                mat[t1_1 - 1, t2_1 - 1] = mat[t1_1 - 1, t2_1 - 1] + 0.25
+                mat[t1_1 - 1, t2_2 - 1] = mat[t1_1 - 1, t2_2 - 1] + 0.25
+                mat[t1_2 - 1, t2_1 - 1] = mat[t1_2 - 1, t2_1 - 1] + 0.25
+                mat[t1_2 - 1, t2_2 - 1] = mat[t1_2 - 1, t2_2 - 1] + 0.25            
+            else:
+                t2 = int(YY[i1])            
+                mat[t1_1 - 1, t2 - 1] = mat[t1_1 - 1, t2 - 1] + 0.5
+                mat[t1_2 - 1, t2 - 1] = mat[t1_2 - 1, t2 - 1] + 0.5
+        else:        
+            t1 = int(XX[i1])        
+            if YY[i1] - int(YY[i1]) != 0:            
+                t2_1 = int(YY[i1])
+                t2_2 = int(YY[i1]) + 1            
+                mat[t1 - 1, t2_1 - 1] = mat[t1 - 1, t2_1 - 1] + 0.5
+                mat[t1 - 1, t2_2 - 1] = mat[t1 - 1, t2_2 - 1] + 0.5
+            else:            
+                t2 = int(YY[i1])            
+                mat[t1-1, t2-1] = mat[t1-1, t2-1] + 1
+    
     ax = plt.figure().gca()
     plt.text(0.85,5.1,"ρ = " + str(ρ), fontsize = 11)
     plt.text(0.85,4.8,"p-value = " + str(p_value), fontsize = 11)
@@ -190,8 +202,7 @@ for i0 in range(4):
     plt.ylabel('Fitness Index (ϵ) (Rank)', fontsize=15)
     plt.imshow(mat, cmap = "Reds", origin = "lower", extent = [0.5,5.5,0.5,5.5])
     cbar = plt.colorbar(ticks = list([0,2,4,8,6,10,12,14,16]), fraction = 0.046, pad = 0.04)
-    cbar.ax.set_yticklabels(list(["0%", "2%", "4%", "6%", "8%", "10%", "12%", "14%", "16%"]))    
-    
+    cbar.ax.set_yticklabels(list(["0%", "2%", "4%", "6%", "8%", "10%"]))    
     plt.show()
 
 ## Table 1.
@@ -209,17 +220,12 @@ print(Table_1)
 
 ## Table 2.
 data_Table2 = Dataset[2]
-
 performance_Linear = np.around([np.mean(data_Table2[i], axis = 0) for i in [0,1]], decimals = 4)
 performance_RBF = np.around([np.mean(data_Table2[i], axis = 0) for i in [2,3]], decimals = 4)
 temp0 = []
-for i0 in range(4):
-    temp1 = []
-    for i1 in range(55):
-        temp1.append(np.mean(np.array(Dataset[2][i0].ravel()).reshape(55,100,8)[i1], axis = 0))
-    temp1 = np.array(temp1)
-    temp0.append(np.round(np.mean(np.array(pd.DataFrame(-temp1).rank(method = "average", axis = 1)), axis = 0),2)        )
 
+for i0 in range(4):
+    temp0.append(np.round(np.mean(np.array(pd.DataFrame(-Dataset[2][i0]).rank(method = "average", axis = 1)), axis = 0),2)        )
 
 train_ratio_list = np.around(np.mean(Dataset[3], axis = 0), decimals = 2)
 sampling_time = np.around(np.sum(Dataset[4], axis = 1) / 100, decimals = 2)
@@ -255,12 +261,10 @@ print(Table_2_RBF)
 ## Table 3.
 temp = []
 for i0 in range(4):
-    temp0 = []
-    for i1 in range(55):
-        temp0.append(np.mean(np.array(Dataset[2][i0].ravel()).reshape(55,100,8)[i1], axis = 0))
-    temp0 = np.array(temp0)
+    temp1 = np.array(Dataset[2][i0])
+    
     for i2 in range(7):
-        temp.append(np.around(ss.wilcoxon(temp0[:,i2], temp0[:,-1])[1], decimals = 4))    
+        temp.append(np.around(ss.wilcoxon(temp1[:,i2], temp1[:,-1])[1], decimals = 4))    
         
 temp = np.array(temp).reshape(4,7).T
 
@@ -271,26 +275,23 @@ Table_3 = pd.DataFrame(index = ["RUS", "NearMiss-1", "NearMiss-2", "Cluster Cent
 Table_3.index.name = "Benchmark Methods"
 
 print(Table_3)
-    
 ################################################################################################################################################
 ### Experiment
 ################################################################################################################################################
 
-# paramters
+# SVM paramters
 C_list = [0.0001,0.001,0.01,0.1,1,10,100,1000,10000]
 gamma_list = [0.0001,0.001,0.01,0.1,1,10,100,1000,10000]
-
 
 def Resample(aa,bb,cc,dd):
     
     seed = dd
 
     if cc == 8:
-        
         X_res, y_res = PSU(aa, bb)
 
     if cc not in [8]:
-
+        
         if cc == 1:
             res = RandomUnderSampler(random_state = seed)
         if cc == 2:
@@ -405,14 +406,12 @@ def test(seed, resample, measure, kernel):
                         else:
                             temp_score1.append(0)
                         
-
                 if measure == "AUC":
                     temp_score0.append(sum(temp_score1)/len(temp_score1))
                     temp_par.append(i1)
                 else:
                     temp_score0.append(sum(temp_score1)/len(temp_score1))
                     temp_par.append(i1)
-        
         
         # rbf kernel
         if kernel == "rbf":
@@ -490,7 +489,6 @@ def test(seed, resample, measure, kernel):
                 score.append(0.5)
             else:
                 score.append(0)
-                
     return score
 
 for i0 in range(1,9):
@@ -499,6 +497,3 @@ for i0 in range(1,9):
         #model = test(i1,i0,"G-Mean", "linear")
         #model = test(i1,i0,"AUC", "rbf")
         #model = test(i1,i0,"G-Mean", "rbf")
-        
-        
-    
