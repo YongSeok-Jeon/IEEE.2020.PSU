@@ -4,4 +4,4 @@
 
 ## PSU
 
-![그림1](https://user-images.githubusercontent.com/32161958/87297489-7aaf2200-c543-11ea-9d25-ecaf1c53eeda.gif)
+![PSU](https://user-images.githubusercontent.com/32161958/87297644-bcd86380-c543-11ea-9786-0f8564b475fb.gif)
