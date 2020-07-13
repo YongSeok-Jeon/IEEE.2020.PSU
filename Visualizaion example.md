@@ -1,6 +1,6 @@
 ## Raw data
 
-![image](https://user-images.githubusercontent.com/32161958/87297350-3c196780-c543-11ea-87b8-62c7091af189.png)
+![RAWDATA](https://user-images.githubusercontent.com/32161958/87297813-045eef80-c544-11ea-8e40-d6067db3048d.png)
 
 ## PSU
 
