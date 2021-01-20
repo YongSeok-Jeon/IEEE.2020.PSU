@@ -45,30 +45,26 @@ with open("Data.pickle","rb") as fr:
 ### PSU
 ################################################################################################################################################
 def PSU(aa,bb):
-    if type(bb) != list:
-        bb = bb.ravel()
-        if 0 in bb:
-            bb[np.where(bb == 0)] = -1
     
-    maj_data = aa[bb== -1]
-    min_data = aa[bb== 1]
+    maj_where = np.where(bb==-1)[0]
+    min_where = np.where(bb==+1)[0]
     
-    n_maj = len(maj_data)
-    n_min = len(min_data)
+    maj_data = aa[maj_where,]
+    min_data = aa[min_where,]
     
-    temp_dist0 = distance.cdist([np.mean(maj_data, axis = 0)], maj_data)
-    temp_sort = np.argsort(temp_dist0)
+    n_maj = len(maj_where)
+    n_min = len(min_where)
     
-    # devide major class data into number of minor class data
-    k, m = divmod(len(range(n_maj)), n_min)
-    temp_interval = list(range(n_maj)[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n_min))
+    temp_interval = np.array_split(list(range(n_maj)), n_min)
     
-    temp_cent = [maj_data[temp_sort[0][temp_interval[0]]][-1]]
+    maj_sort = maj_where[np.argsort(distance.cdist([np.mean(maj_data, axis = 0)], maj_data)[0])]
+    
+    temp_cent = [maj_sort[temp_interval[0]][-1]]
     
     for i in range(n_min-1):
-        temp_cent.append(maj_data[temp_sort[0][temp_interval[i+1]]][np.argmax(np.sum(distance.cdist(temp_cent, maj_data[temp_sort[0][temp_interval[i+1]]]), axis = 0))])
+        temp_cent.append(maj_sort[temp_interval[i+1]][np.argmax(np.sum(distance.cdist(aa[temp_cent,], aa[maj_sort[temp_interval[i+1]]]), axis = 0))])
         
-    return [np.vstack((temp_cent, min_data)), np.hstack((-np.ones(n_min), np.ones(n_min)))]
+    return [np.vstack((aa[temp_cent, ], min_data)), np.hstack((-np.ones(n_min), np.ones(n_min)))]
 
 ################################################################################################################################################
 ### Analysis
